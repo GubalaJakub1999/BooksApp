@@ -2,42 +2,65 @@
 const templates = {
   menuBook: Handlebars.compile(document.querySelector('#template-book').innerHTML)
 };
+
 function render(){
   let html = '';
 
   for(let book of dataSource.books){
-    const generatedHTML = templates.menuBook(book);
+    const ratingBgc = determineRatingBgc(book.rating);
+    const ratingWidth = book.rating * 10;
+    const generatedHTML = templates.menuBook({
+      id: book.id,
+      price: book.price,
+      name: book.name,
+      image: book.image,
+      rating: book.rating,
+      ratingBgc,
+      ratingWidth,
+    });
 
     html += generatedHTML;
+
   }
 
 
   const bookListContainer = document.querySelector('.books-list');
   bookListContainer.innerHTML = html;
+
+
 }
+const favoriteBooks = [];
 const filters = [];
-function initActions(){
-  const favoriteBooks = [];
-  const bookCovers = document.querySelectorAll('.book__image');
-  for(const book of bookCovers){
-    book.addEventListener('dblclick', function(event){
-      event.preventDefault();
-      if(event.target.offsetParent.classList.contains('book__image')){
-        const bookID = event.target.offsetParent.getAttribute('data-id');
-        if(!book.classList.contains('favorite')){
-          book.classList.add('favorite');
-          favoriteBooks.push(bookID);
-        } else {
-          event.target.offsetParent.classList.remove('favorite');
-          const indexBook = favoriteBooks.indexOf(bookID);
-          favoriteBooks.splice(indexBook, 1);
-        }
+function initActions() {
+
+  const booksContainer = document.querySelector('.books-list');
+
+  booksContainer.addEventListener('dblclick', function (event) {
+
+    event.preventDefault();
+
+    if (event.target.offsetParent.classList.contains('book__image')) {
+
+      const bookId = event.target.offsetParent.getAttribute('data-id');
+
+      if (!favoriteBooks.includes(bookId)) {
+
+        favoriteBooks.push(bookId);
+
+        event.target.offsetParent.classList.add('favorite');
+
+      } else {
+
+        const indexOfbookId = favoriteBooks.indexOf(bookId);
+
+        favoriteBooks.splice(indexOfbookId, 1);
+
+        event.target.offsetParent.classList.remove('favorite');
       }
-    });
-  }
-  const filters = [];
-  const form = document.querySelector('.filters');
-  form.addEventListener('click', function(event){
+    }
+  });
+  const filter = document.querySelector('.filters');
+  filter.addEventListener('click', function(event){
     const filterValue = event.target.value;
     if(
       event.target.tagName == 'INPUT'
@@ -80,6 +103,21 @@ function filterBooks(){
       item.classList.remove('hidden');
     }
   }
+}
+
+function determineRatingBgc (rating) {
+  let background = '';
+
+  if(rating <= 6){
+    background = 'linear-gradient(to bottom,  #fefcea 0%, #f1da36 100%)';
+  }else if(rating > 6 && rating <= 8){
+    background = 'linear-gradient(to bottom, #b4df5b 0%,#b4df5b 100%)';
+  }else if(rating > 8 && rating <= 9){
+    background = 'linear-gradient(to bottom, #299a0b 0%, #299a0b 100%)';
+  }else if(rating > 9){
+    background = 'linear-gradient(to bottom, #ff0084 0%,#ff0084 100%)';
+  }
+  return background;
 }
 
 render();
